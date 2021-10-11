@@ -1,25 +1,32 @@
 import React from 'react';
-import logo from './logo.svg';
+import { Switch, Route, BrowserRouter } from 'react-router-dom';
 import './App.css';
+import { ChakraProvider } from '@chakra-ui/react';
+import Detail from './pages/Detail';
+import { Home } from './pages/Home';
+import theme from './theme';
+import { MeliAuthorization } from './pages/MeliAuthorization';
+import { SessionContextProvider } from './data/SessionContextProvider';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ChakraProvider theme={theme}>
+      <SessionContextProvider >
+        <BrowserRouter>
+          <Switch>
+            <Route path='/' exact={true}>
+              <Home />
+            </Route>
+            <Route path='/meli-authorization'>
+              <MeliAuthorization />
+            </Route>
+            <Route path='/detail' exact={true}>
+              <Detail />
+            </Route>
+          </Switch>
+        </BrowserRouter>
+      </SessionContextProvider>
+    </ChakraProvider>
   );
 }
 
