@@ -4,9 +4,13 @@ import { User } from '../models/meli/user';
 
 interface HeaderProps {
   loggedUser: User | null;
+  loading?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ loggedUser }) => {
+export const Header: React.FC<HeaderProps> = ({
+  loggedUser,
+  loading = false,
+}) => {
   return (
     <Box as={'header'} bgColor={'meli.300'}>
       <Container maxW='container.md'>
@@ -23,17 +27,21 @@ export const Header: React.FC<HeaderProps> = ({ loggedUser }) => {
               src={`${process.env.PUBLIC_URL}/logo512.png`}
             />
           </Box>
-          <Flex as={'nav'} alignItems={'flex-end'}>
-            {!loggedUser && (
-              <Link
-                as={'a'}
-                href={`https://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=${process.env.REACT_APP_MELI_CLIENT_ID}`}
-              >
-                Ingresá
-              </Link>
-            )}
-            {loggedUser && <Link as={'a'}>¡Hola, {loggedUser.nickname}!</Link>}
-          </Flex>
+          {!loading && (
+            <Flex as={'nav'} alignItems={'flex-end'}>
+              {!loggedUser && (
+                <Link
+                  as={'a'}
+                  href={`https://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=${process.env.REACT_APP_MELI_CLIENT_ID}`}
+                >
+                  Ingresá
+                </Link>
+              )}
+              {loggedUser && (
+                <Link as={'a'}>¡Hola, {loggedUser.nickname}!</Link>
+              )}
+            </Flex>
+          )}
         </Flex>
       </Container>
     </Box>

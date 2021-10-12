@@ -2,8 +2,10 @@ import { SimpleValue } from '../simpleValue';
 import { Address } from './address';
 
 export interface DesiredItem {
+  /* Id en ParsePlatform */
+  objectId: string;
   /* item.id*/
-  id: string;
+  item_id: string;
   /* item.seller_address.search_location.neighborhood */
   neighborhood: SimpleValue;
   /* item.seller_id */

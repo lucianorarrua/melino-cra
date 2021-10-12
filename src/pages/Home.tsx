@@ -6,7 +6,7 @@ interface Props {}
 
 export const Home = (props: Props) => {
   return (
-    <Layout>
+    <>
       <Box w={'full'} bgColor={'meli.300'}>
         <Container maxW='container.md' pos={'relative'} pt={'30px'} pb={'60px'}>
           <Text fontSize='5xl'>¡Compartí gastos con tu vecino!</Text>
@@ -36,6 +36,6 @@ export const Home = (props: Props) => {
         </Container>
       </Box>
       <Box as={'main'} bgColor={'gray.300'}></Box>
-    </Layout>
+    </>
   );
 };

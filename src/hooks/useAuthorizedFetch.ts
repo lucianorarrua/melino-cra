@@ -1,6 +1,4 @@
-import { SessionStateContex } from './../data/SessionContextProvider';
-import React from 'react';
-import { SessionContext } from '../data/SessionContextProvider';
+import { useSession } from './useSession';
 import { meliFetch } from '../utils/fetch';
 
 /**
@@ -8,13 +6,13 @@ import { meliFetch } from '../utils/fetch';
  * ¡¡¡Debe utilizarse dentro del SessionContextProvider!!!
  * @returns
  */
-export const useAuthFetch = () => {
-  const { tryGetToken } = React.useContext<SessionStateContex>(SessionContext);
+export const useAuthorizedFetch = () => {
+  const { sessionState } = useSession();
 
   const requestWrapper =
     (method: string) =>
     async <T>(input: RequestInfo, init?: RequestInit | undefined) => {
-      let token = await tryGetToken();
+      let token = sessionState.token;
       if (!token) {
         throw new Error('invalid_token');
       }

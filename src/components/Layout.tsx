@@ -1,14 +1,17 @@
 import React from 'react';
-import { SessionContext } from '../data/SessionContextProvider';
+import { useSession } from '../hooks/useSession';
 import { Header } from './Header';
 
 interface LayoutProps {}
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { state } = React.useContext(SessionContext);
+  const { sessionState } = useSession();
   return (
     <>
-      <Header loggedUser={state.meliUser}></Header>
+      <Header
+        loggedUser={sessionState.meliUser}
+        loading={!sessionState.initValues}
+      ></Header>
       {children}
     </>
   );

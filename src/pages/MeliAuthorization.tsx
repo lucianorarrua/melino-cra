@@ -1,16 +1,15 @@
 import { useToast } from '@chakra-ui/toast';
 import React from 'react';
 import { Redirect, useLocation } from 'react-router';
-import { useStorage } from '../hooks/useStorage';
-
+import { useSession } from '../hooks/useSession';
 
 export const MeliAuthorization = () => {
-  const { KEYS, save } = useStorage();
   const toast = useToast();
+  const { getTokenAndSave, getUserTokenAndSave } = useSession();
   const urlParams = new URLSearchParams(useLocation().search);
   const meliCode = urlParams.get('code');
   if (meliCode) {
-    save(KEYS.MELI_CODE, meliCode);
+    getTokenAndSave(meliCode).then((t) => t && getUserTokenAndSave(t));
   } else {
     toast({
       title: 'No se pudo ingresar',

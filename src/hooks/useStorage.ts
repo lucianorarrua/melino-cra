@@ -2,7 +2,6 @@ export const useStorage = () => {
   const _prefix = '__MELINO__';
 
   const KEYS = {
-    MELI_CODE: 'MELI_CODE',
     MELI_TOKEN: 'MELI_TOKEN',
   };
 
