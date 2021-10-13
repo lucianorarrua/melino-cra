@@ -1,41 +1,50 @@
 import React from 'react';
 import { Token } from '../models/meli/token';
 import { User } from '../models/meli/user';
+import { Neighbour } from '../models/melino/neighbour';
 
 export type SessionState = {
   token: Token | null;
   meliUser: User | null;
+  neighbour: Neighbour | null;
   initValues: boolean;
 };
 
 const initialValue: SessionState = {
   token: null,
   meliUser: null,
+  neighbour: null,
   initValues: false,
 };
 
 type SessionActions =
   | {
-      action: 'SET-TOKEN';
+      type: 'SET-TOKEN';
       payload: Token | null;
     }
   | {
-      action: 'SET-USER';
+      type: 'SET-USER';
       payload: User | null;
     }
   | {
-      action: 'INIT-VALUES';
+      type: 'SET-NEIGHBOUR';
+      payload: Neighbour | null;
     }
   | {
-      action: 'CLEAR';
+      type: 'INIT-VALUES';
+    }
+  | {
+      type: 'CLEAR';
     };
 
 const reducer = (state: SessionState, action: SessionActions): SessionState => {
-  switch (action.action) {
+  switch (action.type) {
     case 'SET-TOKEN':
       return { ...state, token: action.payload };
     case 'SET-USER':
       return { ...state, meliUser: action.payload };
+    case 'SET-NEIGHBOUR':
+      return { ...state, neighbour: action.payload };
     case 'INIT-VALUES':
       return { ...state, initValues: true };
     case 'CLEAR':

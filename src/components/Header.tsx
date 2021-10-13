@@ -1,15 +1,17 @@
 import React from 'react';
-import { Box, Container, Flex, Image, Link } from '@chakra-ui/react';
+import { Box, Container, Flex, Image, Link, Text } from '@chakra-ui/react';
 import { User } from '../models/meli/user';
 
 interface HeaderProps {
   loggedUser: User | null;
   loading?: boolean;
+  exitClickHandler?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   loggedUser,
   loading = false,
+  exitClickHandler,
 }) => {
   return (
     <Box as={'header'} bgColor={'meli.300'}>
@@ -38,7 +40,12 @@ export const Header: React.FC<HeaderProps> = ({
                 </Link>
               )}
               {loggedUser && (
-                <Link as={'a'}>¡Hola, {loggedUser.nickname}!</Link>
+                <Flex as={'nav'}>
+                  <Text mr={6}>¡Hola, {loggedUser.nickname}!</Text>
+                  <Link as={'a'} onClick={exitClickHandler}>
+                    Salir
+                  </Link>
+                </Flex>
               )}
             </Flex>
           )}

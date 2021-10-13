@@ -20,6 +20,9 @@ const colors: any = {
     800: '#3a4d00',
     900: '#151b00',
   },
+  gray: {
+    meli: '#ededed',
+  },
 };
 // 3. extend the theme
 const theme = extendTheme({ config, colors });

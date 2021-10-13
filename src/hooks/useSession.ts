@@ -1,8 +1,11 @@
 import React from 'react';
+import { getTokenFromCode, refreshToken } from '../api/auth';
+import { getNeighbourFromMeliId } from '../api/back4App';
 import { SessionContext } from '../data/SessionContextProvider';
 import { Token } from '../models/meli/token';
 import { User } from '../models/meli/user';
-import { meliFetch, jsonToUrlEncode } from '../utils/fetch';
+import { Neighbour } from '../models/melino/neighbour';
+import { meliFetch } from '../utils/fetch';
 import { useStorage } from './useStorage';
 
 export const useSession = () => {
@@ -11,35 +14,35 @@ export const useSession = () => {
 
   React.useEffect(() => {
     initFlow();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.meliUser?.id]);
 
+  const logout = () => {
+    storage.clear();
+    dispatch({ type: 'CLEAR' });
+    return null;
+  };
+
   const initFlow = async () => {
-    console.log('INIT');
     let storageToken = storage.getAndParse<Token>(storage.KEYS.MELI_TOKEN);
     if (storageToken) {
       const refreshedToken = await refreshTokenAndSave(
         storageToken.refresh_token
       );
       if (refreshedToken) {
-        await getUserTokenAndSave(refreshedToken);
+        const meliUser = await getUserTokenAndSave(refreshedToken);
+        await getNeighbourAndSave(meliUser?.id);
       }
     }
-    dispatch({ action: 'INIT-VALUES' });
+    dispatch({ type: 'INIT-VALUES' });
   };
-
-  const logout = () => {
-    storage.clear();
-    dispatch({ action: 'CLEAR' });
-    return null;
-  };
-
   /* Si puede, obtiene el token del context. Si no, lo busca del localstorage. Si nada de eso funciona, */
   const getTokenAndSave = async (code: string): Promise<Token | null> => {
     let token;
     try {
       /* Si hay código, intenta obtener un token con dicho código */
       token = await getTokenFromCode(code);
-      dispatch({ action: 'SET-TOKEN', payload: token });
+      dispatch({ type: 'SET-TOKEN', payload: token });
       storage.stringifyAndSave(storage.KEYS.MELI_TOKEN, token);
     } catch (error) {
       token = null;
@@ -53,7 +56,7 @@ export const useSession = () => {
     let token;
     try {
       token = await refreshToken(refresh_token);
-      dispatch({ action: 'SET-TOKEN', payload: token });
+      dispatch({ type: 'SET-TOKEN', payload: token });
       storage.stringifyAndSave(storage.KEYS.MELI_TOKEN, token);
     } catch (error) {
       token = null;
@@ -68,52 +71,33 @@ export const useSession = () => {
     }
     let user: User | null = null;
     try {
-      user = await getUserToken(token);
-      dispatch({ action: 'SET-USER', payload: user });
+      user = await meliFetch<User>('https://api.mercadolibre.com/users/me', {
+        headers: {
+          Authorization: `Bearer ${token.access_token}`,
+        },
+      });
+      dispatch({ type: 'SET-USER', payload: user });
     } catch (error) {
       user = null;
     }
     return user;
   };
 
-  /* REQUESTS */
-  const getTokenFromCode = async (code: string) =>
-    meliFetch<Token>('https://api.mercadolibre.com/oauth/token', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Accept: 'application/json',
-      },
-      body: jsonToUrlEncode({
-        grant_type: 'authorization_code',
-        client_id: process.env.REACT_APP_MELI_CLIENT_ID,
-        client_secret: process.env.REACT_APP_MELI_CLIENT_SECRET,
-        code,
-        redirect_uri: process.env.REACT_APP_MELI_REDIRECT_URI,
-      }),
-    });
-
-  const refreshToken = async (refresh_token: string) =>
-    meliFetch<Token>('https://api.mercadolibre.com/oauth/token', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Accept: 'application/json',
-      },
-      body: jsonToUrlEncode({
-        grant_type: 'refresh_token',
-        client_id: process.env.REACT_APP_MELI_CLIENT_ID,
-        client_secret: process.env.REACT_APP_MELI_CLIENT_SECRET,
-        refresh_token,
-      }),
-    });
-
-  const getUserToken = async (token: Token) =>
-    meliFetch<User>('https://api.mercadolibre.com/users/me', {
-      headers: {
-        Authorization: `Bearer ${token.access_token}`,
-      },
-    });
+  const getNeighbourAndSave = async (
+    meliUserId: number | undefined
+  ): Promise<Neighbour | null> => {
+    if (!meliUserId) {
+      return null;
+    }
+    let neighbour: Neighbour | null = null;
+    try {
+      neighbour = await getNeighbourFromMeliId(meliUserId);
+      dispatch({ type: 'SET-NEIGHBOUR', payload: neighbour });
+    } catch (error) {
+      neighbour = null;
+    }
+    return neighbour;
+  };
 
   return {
     getTokenAndSave,

@@ -8,6 +8,7 @@ import { meliFetch } from '../utils/fetch';
  */
 export const useAuthorizedFetch = () => {
   const { sessionState } = useSession();
+  const meliApiBase = 'https://api.mercadolibre.com';
 
   const requestWrapper =
     (method: string) =>
@@ -16,25 +17,42 @@ export const useAuthorizedFetch = () => {
       if (!token) {
         throw new Error('invalid_token');
       }
-      init ??= {};
-      init.headers ??= {};
+      init = init ? init : {};
+      init.headers = init.headers ? init.headers : {};
       init = {
         ...init,
         method,
         headers: {
           ...init.headers,
-          Authorization: `bearer ${token || ''}`,
+          Authorization: `Bearer ${token.access_token}`,
         },
       };
-
       return meliFetch<T>(input, init);
     };
+
+  const MELI_ENDPOINTS = {
+    users: {
+      me: {
+        URL: `${meliApiBase}/users/me`,
+        bookmarks: {
+          URL: `${meliApiBase}/users/me/bookmarks`,
+        },
+        addresses: {
+          URL: `${meliApiBase}/users/me/addresses`,
+        },
+      },
+    },
+    items: {
+      URL: `${meliApiBase}/items`,
+    },
+  };
 
   const requests = {
     get: requestWrapper('get'),
     put: requestWrapper('put'),
     post: requestWrapper('post'),
     delete: requestWrapper('delete'),
+    MELI_ENDPOINTS,
   };
   return requests;
 };

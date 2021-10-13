@@ -3,11 +3,13 @@ import { DesiredItem } from './desiredItem';
 
 export interface Neighbour {
   /* Id en ParsePlatform */
-  objectId: string;
+  objectId?: string;
   /* Lista de items deseados por el vecino */
-  desiredItems: DesiredItem[];
+  desiredItems?: DesiredItem[] | null;
   /* Usuario en meli  */
   meliUserId: number;
   /* Direcciones que el vecino tiene almacenadas */
-  addresses: Address[];
+  addresses?: Address[] | null;
+  /* Flag que indica si ya importó sus direcciones desde MELI */
+  importAddresses?: Boolean;
 }

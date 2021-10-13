@@ -6,8 +6,15 @@ import theme from './theme';
 import { MeliAuthorization } from './pages/MeliAuthorization';
 import { SessionContextProvider } from './data/SessionContextProvider';
 import { Layout } from './components/Layout';
+import Parse from 'parse';
 
 function App() {
+  Parse.serverURL = process.env.REACT_APP_PARSE_HOST_URL || '';
+  Parse.initialize(
+    process.env.REACT_APP_PARSE_APPLICATION_ID || '',
+    process.env.REACT_APP_PARSE_JAVASCRIPT_KEY || ''
+  );
+
   return (
     <ChakraProvider theme={theme}>
       <SessionContextProvider>
