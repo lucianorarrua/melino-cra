@@ -15,7 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <Box as={'header'} bgColor={'yellow.meli'}>
-      <Container maxW='container.xl' pb={2}>
+      <Container maxW='container.lg' pb={2}>
         <Flex
           h={'3.5rem'}
           w={'full'}

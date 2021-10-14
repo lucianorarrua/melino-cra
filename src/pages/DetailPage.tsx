@@ -13,6 +13,7 @@ import {
 import React from 'react';
 import { useLocation, useParams } from 'react-router';
 import { deleteParseObject, updateNeighbour } from '../api/back4App';
+import { ImageViewer } from '../components/ImageViewer';
 import { useSession } from '../hooks/useSession';
 import { Attribute, Item } from '../models/meli/item';
 import { meliFetch } from '../utils/fetch';
@@ -36,7 +37,7 @@ const DetailPage = () => {
       .catch();
   }, [location, itemId]);
 
-  React.useEffect(() => {    
+  React.useEffect(() => {
     if (sessionState.neighbour) {
       setIsDesired(
         sessionState.neighbour.desiredItems?.findIndex(
@@ -110,7 +111,7 @@ const DetailPage = () => {
   }
 
   return (
-    <Container maxW='container.xl' pt={6} pb={6}>
+    <Container maxW='container.lg' pt={6} pb={6}>
       <Grid
         borderRadius='6px'
         borderColor={'gray.meli'}
@@ -120,21 +121,19 @@ const DetailPage = () => {
         h='500px'
         w={'full'}
         minW={'full'}
-        templateRows='repeat(1, 1fr)'
+        /*         templateRows='repeat(1, 1fr)'
+         */ templateRows='1fr 50px'
         templateColumns='repeat(3, 1fr)'
         overflow={'hidden'}
         p={'16px'}
         gap={'48px'}
       >
-        <GridItem
-          h={'full'}
-          colSpan={2}
-          border={'1px'}
-          borderRadius='6px'
-          borderColor={'gray.meli'}
-        ></GridItem>
+        <GridItem h={'full'} colSpan={2} rowSpan={1}>
+          <ImageViewer itemTitle={item.title} pictures={item.pictures} />
+        </GridItem>
         <GridItem
           colSpan={1}
+          rowSpan={1}
           border={'1px'}
           borderRadius='6px'
           borderColor={'gray.meli'}
@@ -208,6 +207,16 @@ const DetailPage = () => {
                 )}
               </Box>
             </Tooltip>
+            <Text
+              w={'full'}
+              as={'a'}
+              href={item.permalink}
+              color={'blue.500'}
+              _hover={{ color: 'blue.600' }}
+              target={'_blank'}
+            >
+              Ver en mercadolibre.com
+            </Text>
           </VStack>
         </GridItem>
       </Grid>
