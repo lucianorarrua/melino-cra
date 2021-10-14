@@ -8,22 +8,19 @@ const config: ThemeConfig = {
 };
 
 const colors: any = {
-  meli: {
-    50: '#fdffdc',
-    100: '#ffffaf',
-    200: '#fff87e',
-    300: '#fff159',
-    400: '#fffb1f',
-    500: '#dce608',
-    600: '#9fb300',
-    700: '#698000',
-    800: '#3a4d00',
-    900: '#151b00',
+  yellow: {
+    meli: '#fff159',
   },
   gray: {
     meli: '#ededed',
   },
 };
+
+const fonts: any = {
+  heading: 'Proxima Nova',
+  body: 'Proxima Nova',
+};
+
 // 3. extend the theme
-const theme = extendTheme({ config, colors });
+const theme = extendTheme({ config, colors, fonts });
 export default theme;

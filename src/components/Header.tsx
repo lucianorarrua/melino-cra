@@ -14,15 +14,15 @@ export const Header: React.FC<HeaderProps> = ({
   exitClickHandler,
 }) => {
   return (
-    <Box as={'header'} bgColor={'meli.300'}>
-      <Container maxW='container.md'>
+    <Box as={'header'} bgColor={'yellow.meli'}>
+      <Container maxW='container.xl' pb={2}>
         <Flex
           h={'3.5rem'}
           w={'full'}
           direction={'row'}
           justifyContent={'space-between'}
         >
-          <Box as={'a'} h={'100%'} w={'auto'} href='/'>
+          <Box as={'a'} h={'100%'} w={'auto'} minW={'56px'} href='/'>
             <Image
               m={'2.5px'}
               h={'100%'}
@@ -30,7 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
             />
           </Box>
           {!loading && (
-            <Flex as={'nav'} alignItems={'flex-end'}>
+            <Flex as={'nav'} alignItems={'flex-end'} mr={3}>
               {!loggedUser && (
                 <Link
                   as={'a'}

@@ -50,13 +50,6 @@ async function getNeighbourFromMeliId(
       queryResult,
       'desiredItems'
     );
-    /* const desiredItems = (
-      await queryResult
-        .relation('desiredItems' as never)
-        .query()
-        .find()
-    ).map((a) => a.attributes as DesiredItem); */
-
     return Promise.resolve({
       ...queryResult.attributes,
       objectId: queryResult.id,
@@ -96,7 +89,6 @@ async function updateNeighbour(
     const newDesiredItems = neighbourData.desiredItems?.filter(
       (a) => !a.objectId
     );
-
     queryResult.set('importAddresses', neighbourData.importAddresses);
 
     /* Si hay, agrega direcciones */
@@ -134,6 +126,28 @@ async function updateNeighbour(
   }
 }
 
+async function addDesiredItem(objectId: string, desiredItem: DesiredItem) {
+  let neighbourQuery = new Parse.Query<Parse.Object<Neighbour>>('Neighbour');
+  try {
+    const neighbourResult: Parse.Object = await neighbourQuery.get(objectId);
+    if (!neighbourResult) {
+      return Promise.reject('No se encontró el Neighbour');
+    }
+    const newDesired = (await createParseObject({
+      className: 'DesiredItem',
+      attributes: desiredItem,
+    })) as Parse.Object<DesiredItem>;
+    const diRelation = neighbourResult.relation('desiredItems');
+    diRelation.add(newDesired);
+    neighbourResult.save();
+    return Promise.resolve({
+      ...(newDesired.attributes as DesiredItem),
+    });
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 /**
  * Create a new Parse Object
  * @param newObject - Objeto a crear
@@ -154,4 +168,32 @@ async function createParseObject(newObject: ClassInstance) {
   }
 }
 
-export { getNeighbourFromMeliId, createParseObject, updateNeighbour };
+/**
+ * Create a new Parse Object
+ * @param newObject - Objeto a crear
+ * @returns
+ */
+async function deleteParseObject(delObj: {
+  objectId: string;
+  className: 'Neighbour' | 'Address' | 'DesiredItem';
+}) {
+  let objQuery = new Parse.Query(delObj.className);
+  try {
+    const delObject: Parse.Object = await objQuery.get(delObj.objectId);
+    if (!delObject) {
+      return Promise.reject(`No se encontró el ${delObj.className}`);
+    }
+    const result: Parse.Object = await delObject.destroy();
+    return Promise.resolve(result);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+}
+
+export {
+  getNeighbourFromMeliId,
+  createParseObject,
+  updateNeighbour,
+  addDesiredItem,
+  deleteParseObject,
+};

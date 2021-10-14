@@ -15,15 +15,18 @@ import { WelcomeModal } from '../components/WelcomeModal';
 import { updateNeighbour } from '../api/back4App';
 import { Address } from '../models/melino/address';
 import { Neighbour } from '../models/melino/neighbour';
+import { SearchedResult, SearchInput } from '../components/SearchInput';
+import { meliFetch } from '../utils/fetch';
+import { Product } from '../models/meli/product';
+import { Redirect, useHistory } from 'react-router';
 
-interface Props {}
-
-export const Home = (props: Props) => {
+export const Home = () => {
   const [savedAddresses, setSavedAddresses] = React.useState<UserAddress[]>([]);
   const { sessionState } = useSession();
   const { get, MELI_ENDPOINTS } = useAuthorizedFetch();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+  const history = useHistory();
 
   /* Si hay un usuario llama al Init */
   React.useEffect(() => {
@@ -63,7 +66,10 @@ export const Home = (props: Props) => {
       }));
       let newNeighbour: Neighbour = {
         ...sessionState.neighbour,
-        addresses: [...sessionState.neighbour.addresses!, ...newMelinoAddresses],
+        addresses: [
+          ...sessionState.neighbour.addresses!,
+          ...newMelinoAddresses,
+        ],
         importAddresses: true,
       };
       updateNeighbour(newNeighbour)
@@ -88,6 +94,25 @@ export const Home = (props: Props) => {
     }
   };
 
+  const onSearchInputSubmit = async (searchResult: SearchedResult) => {
+    if (!searchResult.id) {
+      return toast({
+        description: 'No pudimos encontrar nada en la URL ingresada',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+    let redirectId: string = searchResult.id;
+    if (searchResult.isCatalogProduct) {
+      const product = await meliFetch<Product>(
+        `https://api.mercadolibre.com/products/${searchResult.id}`
+      );
+      redirectId = product.buy_box_winner.item_id;
+    }
+    history.push(`/detail/${redirectId}`);
+  };
+
   return (
     <>
       <WelcomeModal
@@ -95,7 +120,7 @@ export const Home = (props: Props) => {
         onClose={closeModalHandler}
         savedAddresses={savedAddresses}
       />
-      <Box w={'full'} bgColor={'meli.300'}>
+      <Box w={'full'} bgColor={'yellow.meli'}>
         <Container maxW='container.md' pos={'relative'} pt={'30px'} pb={'60px'}>
           <Text fontSize='5xl'>¡Compartí gastos con tu vecino!</Text>
           <Text fontSize='2xl'>
@@ -109,21 +134,9 @@ export const Home = (props: Props) => {
             </Link>{' '}
             y averiguá con quien podes compartir el envío.
           </Text>
-          <Box
-            w={'full'}
-            as={'input'}
-            p={'7px 60px 9px 15px'}
-            borderRadius={'md'}
-            boxShadow={'rgba(0, 0, 0, 0.2) 0px 1px 2px 0px'}
-            pos='absolute'
-            bottom={'-20px'}
-            placeholder={'Ingresá una URL de mercadolibre.com'}
-            right={0}
-            left={0}
-          ></Box>
+          <SearchInput onSubmit={onSearchInputSubmit} />
         </Container>
       </Box>
-      <Box as={'main'} bgColor={'gray.300'}></Box>
     </>
   );
 };

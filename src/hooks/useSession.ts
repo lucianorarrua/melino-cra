@@ -99,10 +99,29 @@ export const useSession = () => {
     return neighbour;
   };
 
+  /**
+   * Actualiza el Neighbour del store con el Neighbour que pasa como argumento. Si no se pasa el argumento, intenta actualizarlo haciendo un request.
+   * @param newNeighbour Neighbour con el cual se va a actualizar el store
+   * @returns
+   */
+  const updateNeighbourAndSave = async (
+    newNeighbour?: Neighbour
+  ): Promise<Neighbour | null> => {
+    if (newNeighbour) {
+      dispatch({ type: 'SET-NEIGHBOUR', payload: newNeighbour });
+      return newNeighbour;
+    }
+    if (!state.meliUser) {
+      return null;
+    }
+    return getNeighbourAndSave(state.meliUser.id);
+  };
+
   return {
     getTokenAndSave,
     refreshTokenAndSave,
     getUserTokenAndSave,
+    updateNeighbourAndSave,
     logout,
     sessionState: state,
   };
