@@ -1,7 +1,8 @@
-import { Box, Center, Flex, VStack } from '@chakra-ui/layout';
+import { Center, Flex, VStack } from '@chakra-ui/layout';
 import { Image } from '@chakra-ui/react';
 import React from 'react';
 import { ItemPicture } from '../models/meli/item';
+import { isPortrait, getW } from '../utils/pictures';
 
 interface Props {
   pictures: ItemPicture[];
@@ -10,13 +11,6 @@ interface Props {
 
 export const ImageViewer: React.FC<Props> = ({ pictures, itemTitle }) => {
   const [indexSelected, setIndexSelected] = React.useState(0);
-  const picturesLength = () => pictures.length;
-
-  const getW = (size: string) => Number(size.split('x')[0]);
-
-  const getH = (size: string) => Number(size.split('x')[1]);
-
-  const isPortrait = (size: string) => getH(size) > getW(size);
 
   return (
     <Flex flexDirection={'row'} h={'full'}>
@@ -38,7 +32,7 @@ export const ImageViewer: React.FC<Props> = ({ pictures, itemTitle }) => {
               w={isPortrait(p.size) ? 'auto' : 'full'}
               h={isPortrait(p.size) ? 'full' : 'auto'}
               src={p.secure_url}
-              alt={`Imagen ${k + 1} de ${picturesLength() + 1} de ${itemTitle}`}
+              alt={`Imagen ${k + 1} de ${pictures.length + 1} de ${itemTitle}`}
               onMouseEnter={() => setIndexSelected(k)}
             ></Image>
           </Center>
@@ -52,7 +46,7 @@ export const ImageViewer: React.FC<Props> = ({ pictures, itemTitle }) => {
           maxW={`${getW(pictures[indexSelected].size)}px`}
           src={pictures[indexSelected].secure_url}
           alt={`Imagen ${indexSelected + 1} de ${
-            picturesLength() + 1
+            pictures.length + 1
           } de ${itemTitle}`}
         ></Image>
       </Center>

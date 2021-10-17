@@ -8,7 +8,7 @@ export interface Address {
      */
   name: string;
   /* id de la address en Meli. Si es null, es porque se cargó manualmente desde Melino */
-  meli_id: number;
+  meli_id?: number;
   /* Latitud y longitud en GoogleMaps */
   geolocation: GeoPoint;
 }

@@ -23,7 +23,10 @@ export const MeliAuthorization = () => {
             if (!parseNeighbour) {
               await createParseObject({
                 className: 'Neighbour',
-                attributes: { meliUserId: meliUser.id },
+                attributes: {
+                  meliUserId: meliUser.id,
+                  name: meliUser.first_name,
+                },
               });
             }
           }

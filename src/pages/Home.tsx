@@ -10,45 +10,129 @@ import {
 import { useSession } from '../hooks/useSession';
 import { useAuthorizedFetch } from '../hooks/useAuthorizedFetch';
 import { UserAddress } from '../models/meli/userAddress';
-import Parse from 'parse';
+import Parse, { GeoPoint } from 'parse';
 import { WelcomeModal } from '../components/WelcomeModal';
-import { updateNeighbour } from '../api/back4App';
+import { getNearNeighbours, updateNeighbour } from '../api/back4App';
 import { Address } from '../models/melino/address';
 import { Neighbour } from '../models/melino/neighbour';
 import { SearchedResult, SearchInput } from '../components/SearchInput';
 import { meliFetch } from '../utils/fetch';
 import { Product } from '../models/meli/product';
-import { Redirect, useHistory } from 'react-router';
+import { useHistory } from 'react-router';
+import {
+  NearNeighbour,
+  NearNeighbourList,
+} from '../components/NearNeighbourList';
 
 export const Home = () => {
+  /**
+   * savedAddresses son las direccione que la persona tiene almacenadas en mercadolibre. Se guardan en un estado para luego pasarlo al WelcomeModal la primera vez que ingresan a melino.
+   */
   const [savedAddresses, setSavedAddresses] = React.useState<UserAddress[]>([]);
+  /**
+   * Lista de los Vecinos cercanos
+   */
+  const [nearNeighbours, setNearNeighbours] = React.useState<NearNeighbour[]>(
+    []
+  );
+
   const { sessionState } = useSession();
   const { get, MELI_ENDPOINTS } = useAuthorizedFetch();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const history = useHistory();
 
-  /* Si hay un usuario llama al Init */
+  /* Al iniciar, solicita permiso para ubicación, y si se concede, agrega la ubicación a los nearNeighbours */
   React.useEffect(() => {
     if (
-      sessionState.meliUser &&
-      sessionState.neighbour &&
-      !sessionState.neighbour.importAddresses
+      navigator.geolocation &&
+      nearNeighbours.filter((nb) => nb.address.meli_id === -1).length === 0
     ) {
-      init();
+      navigator.geolocation.getCurrentPosition((pos) =>
+        getNearNeighbours(
+          new GeoPoint({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          }),
+          1
+        ).then((r) =>
+          setNearNeighbours((n) => [
+            ...n,
+            {
+              address: {
+                meli_id: -1,
+                name: 'Tu ubicación actual',
+                geolocation: new GeoPoint({
+                  latitude: pos.coords.latitude,
+                  longitude: pos.coords.longitude,
+                }),
+              },
+              neighbour: r,
+            },
+          ])
+        )
+      );
     }
+  }, []);
+
+  /* Si hay un usuario llama al Init */
+  React.useEffect(() => {
+    async function newUserFlow() {
+      if (sessionState.meliUser && sessionState.neighbour) {
+        /**
+         * Si es usuario nuevo abre el modal de direcciones
+         */
+        if (!sessionState.neighbour.importAddresses) {
+          const addresses = await get<UserAddress[]>(
+            `${MELI_ENDPOINTS.users.me.addresses.URL}`
+          );
+          setSavedAddresses(addresses);
+          onOpen();
+        }
+      }
+    }
+    newUserFlow();
   }, [sessionState.meliUser?.id, sessionState.neighbour]);
 
-  /**
-   * Si es usuario nuevo abre el modal de direcciones
-   */
-  async function init() {
-    const addresses = await get<UserAddress[]>(
-      `${MELI_ENDPOINTS.users.me.addresses.URL}`
-    );
-    setSavedAddresses(addresses);
-    onOpen();
-  }
+  /* Cada vez que cambien las addresses del usuario logueado, se fija las que no están y las agrega a las direcciones para buscar los neighbour cercanos   */
+  React.useEffect(() => {
+    if (
+      sessionState.neighbour &&
+      sessionState.neighbour.addresses &&
+      sessionState.neighbour.addresses?.length > 0
+    ) {
+      let copyNearNeighbours = nearNeighbours;
+      const addressesNoAgregadas = sessionState.neighbour.addresses.filter(
+        (a) =>
+          nearNeighbours.findIndex((nnb) => nnb.address.meli_id === a.meli_id) <
+          0
+      );
+      setNearNeighbours((n) => [
+        ...n,
+        ...addressesNoAgregadas.map((ana) => ({
+          address: ana,
+          neighbour: [],
+        })),
+      ]);
+
+      if (addressesNoAgregadas.length > 0) {
+        Promise.all(
+          addressesNoAgregadas.map((ana) =>
+            getNearNeighbours(ana.geolocation, 1)
+          )
+        ).then((nbs) => {
+          for (let index = 0; index < nbs.length; index++) {
+            //copyNearNeighbours[index].neighbour = nbs[index];
+            copyNearNeighbours.push({
+              address: addressesNoAgregadas[index],
+              neighbour: nbs[index],
+            });
+          }
+          setNearNeighbours(copyNearNeighbours);
+        });
+      }
+    }
+  }, [sessionState.neighbour?.addresses]);
 
   const closeModalHandler = (selectedAddressIds: number[]) => {
     onClose();
@@ -137,6 +221,22 @@ export const Home = () => {
           <SearchInput onSubmit={onSearchInputSubmit} />
         </Container>
       </Box>
+      <Container
+        mt={6}
+        maxW='container.xl'
+        pos={'relative'}
+        pt={'30px'}
+        pb={'60px'}
+      >
+        {nearNeighbours
+          .filter((nnb) => nnb.neighbour.length > 0)
+          .map((nb, i) => (
+            <NearNeighbourList
+              key={`nbfh-${i}`}
+              nearNeighbour={nb}
+            ></NearNeighbourList>
+          ))}
+      </Container>
     </>
   );
 };

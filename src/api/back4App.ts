@@ -1,4 +1,4 @@
-import Parse from 'parse';
+import Parse, { GeoPoint } from 'parse';
 import { Address } from '../models/melino/address';
 import { DesiredItem } from '../models/melino/desiredItem';
 import { Neighbour } from './../models/melino/neighbour';
@@ -126,6 +126,12 @@ async function updateNeighbour(
   }
 }
 
+/**
+ * Agrega un DesiredItem a un Neighbour
+ * @param objectId - ID del Neighbour
+ * @param desiredItem - DesiredItem a agregar
+ * @returns
+ */
 async function addDesiredItem(objectId: string, desiredItem: DesiredItem) {
   let neighbourQuery = new Parse.Query<Parse.Object<Neighbour>>('Neighbour');
   try {
@@ -190,10 +196,69 @@ async function deleteParseObject(delObj: {
   }
 }
 
+/**
+ *
+ * @param geoPoint Punto de referencia desde el cual se va a hacer la búsqueda
+ * @param kmDistance Radio de distancia de búsqueda
+ * @param sellerIds (opcional) Filtro de vendedores en alguno de los items
+ * @returns
+ */
+async function getNearNeighbours(
+  geoPoint: GeoPoint,
+  kmDistance: number,
+  sellerIds?: number[]
+) {
+  const result: Neighbour[] = [];
+  try {
+    var Neighbour = Parse.Object.extend('Neighbour');
+
+    let neighbourQuery: Parse.Query<Parse.Object<Neighbour>> = new Parse.Query<
+      Parse.Object<Neighbour>
+    >(Neighbour);
+
+    const addressQuery = new Parse.Query('Address');
+    addressQuery.withinKilometers('geolocation', geoPoint, kmDistance);
+
+    if (sellerIds?.length) {
+      const desiredItemQuery = new Parse.Query('DesiredItem');
+      desiredItemQuery.containedIn('seller_id', sellerIds);
+      neighbourQuery.matchesQuery('desiredItems', desiredItemQuery);
+    }
+    neighbourQuery.matchesQuery('addresses', addressQuery);
+
+    const queryResults = await neighbourQuery.find();
+
+    for (let index = 0; index < queryResults.length; index++) {
+      const queryResult = queryResults[index];
+      const desiredItems = (await queryResult
+        .relation('desiredItems' as never)
+        .query()
+        .map((di) => di.attributes)) as DesiredItem[];
+
+      const addresses = (await queryResult
+        .relation('addresses' as never)
+        .query()
+        .map((di) => di.attributes)) as Address[];
+
+      result.push({
+        ...queryResult.attributes,
+        objectId: queryResult.id,
+        desiredItems,
+        addresses,
+      });
+    }
+
+    return Promise.resolve(result);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+}
+
 export {
   getNeighbourFromMeliId,
   createParseObject,
   updateNeighbour,
   addDesiredItem,
   deleteParseObject,
+  getNearNeighbours,
 };

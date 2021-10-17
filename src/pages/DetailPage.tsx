@@ -72,6 +72,7 @@ const DetailPage = () => {
           item_id: item.id,
           seller_id: item.seller_id,
           title: item.title,
+          main_picture: item.pictures[0],
         },
       ],
     })
