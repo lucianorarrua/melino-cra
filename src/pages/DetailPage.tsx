@@ -119,22 +119,25 @@ const DetailPage = () => {
         border={'3px'}
         boxShadow={'0 1px 2px 0 rgba(0,0,0,.25)'}
         backgroundColor={'white'}
-        h='500px'
         w={'full'}
         minW={'full'}
-        /*         templateRows='repeat(1, 1fr)'
-         */ templateRows='1fr 50px'
+        maxH={{ md: '650px' }}
+        templateRows='1fr auto'
         templateColumns='repeat(3, 1fr)'
         overflow={'hidden'}
         p={'16px'}
         gap={'48px'}
       >
-        <GridItem h={'full'} colSpan={2} rowSpan={1}>
+        <GridItem
+          h={'500px'}
+          colSpan={{ base: 3, md: 2 }}
+          rowSpan={{ base: 1, md: 1 }}
+        >
           <ImageViewer itemTitle={item.title} pictures={item.pictures} />
         </GridItem>
         <GridItem
-          colSpan={1}
-          rowSpan={1}
+          colSpan={{ base: 3, md: 1 }}
+          rowSpan={{ base: 2, md: 1 }}
           border={'1px'}
           borderRadius='6px'
           borderColor={'gray.meli'}

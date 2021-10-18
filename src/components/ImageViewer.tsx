@@ -13,8 +13,14 @@ export const ImageViewer: React.FC<Props> = ({ pictures, itemTitle }) => {
   const [indexSelected, setIndexSelected] = React.useState(0);
 
   return (
-    <Flex flexDirection={'row'} h={'full'}>
-      <VStack as={'ul'} w={'50px'}>
+    <Flex flexDirection={{ base: 'column-reverse', md: 'row' }} h={'full'}>
+      <Flex
+        as={'ul'}
+        w={{ base: 'full', md: '50px' }}
+        h={{ base: '50px', md: 'auto' }}
+        flexDirection={{ base: 'row', md: 'column' }}
+        justifyContent={{ base: 'center', md: 'flex-start' }}
+      >
         {pictures.map((p, k) => (
           <Center
             borderRadius={4}
@@ -37,7 +43,7 @@ export const ImageViewer: React.FC<Props> = ({ pictures, itemTitle }) => {
             ></Image>
           </Center>
         ))}
-      </VStack>
+      </Flex>
       <Center minW={'full'}>
         <Image
           as={'img'}

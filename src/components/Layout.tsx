@@ -28,12 +28,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         pl={6}
       >
         <Text opacity={0.5}>
-          <Image
-            boxSize='15px'
-            src={`${process.env.PUBLIC_URL}/pixel-heart.webp`}
-            alt='Segun Adebayo'
-            display={'inline'}
-          />{' '}
           By{' '}
           <Text
             as={'a'}
@@ -42,7 +36,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             fontWeight={'bold'}
           >
             Luciano Arrúa
-          </Text>
+          </Text>{' '}
+          <Image
+            boxSize='15px'
+            src={`${process.env.PUBLIC_URL}/pixel-heart.webp`}
+            alt='Segun Adebayo'
+            display={'inline'}
+          />
         </Text>
       </Box>
     </>
