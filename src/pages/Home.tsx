@@ -44,10 +44,7 @@ export const Home = () => {
 
   /* Al iniciar, solicita permiso para ubicación, y si se concede, agrega la ubicación a los nearNeighbours */
   React.useEffect(() => {
-    if (
-      navigator.geolocation &&
-      nearNeighbours.filter((nb) => nb.address.meli_id === -1).length === 0
-    ) {
+    if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((pos) =>
         getNearNeighbours(
           new GeoPoint({
@@ -78,7 +75,7 @@ export const Home = () => {
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sessionState.neighbour?.objectId]);
 
   /* Si hay un usuario llama al Init */
   React.useEffect(() => {

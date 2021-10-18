@@ -245,9 +245,8 @@ async function getNearNeighbours(
 
       desiredItems = desiredItems.filter(
         (di) =>
-          (desiredItems || []).findIndex(
-            (edi) => edi.objectId === di.objectId
-          ) < 0
+          (exceptDesiredItemId || []).findIndex((edi) => edi === di.objectId) <
+          0
       );
 
       const addresses = (await queryResult
