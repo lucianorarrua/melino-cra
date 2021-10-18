@@ -28,15 +28,19 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         pl={6}
       >
         <Text opacity={0.5}>
-          Hecho con{' '}
           <Image
             boxSize='15px'
             src={`${process.env.PUBLIC_URL}/pixel-heart.webp`}
             alt='Segun Adebayo'
             display={'inline'}
           />{' '}
-          por{' '}
-          <Text as={'a'} href={'https://www.github.com/lucianorarrua'} target={'_blank'} fontWeight={'bold'}>
+          By{' '}
+          <Text
+            as={'a'}
+            href={'https://www.github.com/lucianorarrua'}
+            target={'_blank'}
+            fontWeight={'bold'}
+          >
             Luciano Arrúa
           </Text>
         </Text>

@@ -201,12 +201,15 @@ async function deleteParseObject(delObj: {
  * @param geoPoint Punto de referencia desde el cual se va a hacer la búsqueda
  * @param kmDistance Radio de distancia de búsqueda
  * @param sellerIds (opcional) Filtro de vendedores en alguno de los items
+ * @param exceptNeighbourId (opcional) Id de Neighbour a excluir de la lista
  * @returns
  */
 async function getNearNeighbours(
   geoPoint: GeoPoint,
   kmDistance: number,
-  sellerIds?: number[]
+  sellerIds?: number[],
+  exceptNeighbourId?: string,
+  exceptDesiredItemId?: string[]
 ) {
   const result: Neighbour[] = [];
   try {
@@ -221,8 +224,13 @@ async function getNearNeighbours(
 
     if (sellerIds?.length) {
       const desiredItemQuery = new Parse.Query('DesiredItem');
+      desiredItemQuery.include('objectId');
       desiredItemQuery.containedIn('seller_id', sellerIds);
       neighbourQuery.matchesQuery('desiredItems', desiredItemQuery);
+    }
+
+    if (exceptNeighbourId) {
+      neighbourQuery.notEqualTo('objectId', exceptNeighbourId);
     }
     neighbourQuery.matchesQuery('addresses', addressQuery);
 
@@ -230,22 +238,30 @@ async function getNearNeighbours(
 
     for (let index = 0; index < queryResults.length; index++) {
       const queryResult = queryResults[index];
-      const desiredItems = (await queryResult
+      let desiredItems = (await queryResult
         .relation('desiredItems' as never)
         .query()
-        .map((di) => di.attributes)) as DesiredItem[];
+        .map((di) => ({ ...di.attributes, objectId: di.id }))) as DesiredItem[];
+
+      desiredItems = desiredItems.filter(
+        (di) =>
+          (desiredItems || []).findIndex(
+            (edi) => edi.objectId === di.objectId
+          ) < 0
+      );
 
       const addresses = (await queryResult
         .relation('addresses' as never)
         .query()
         .map((di) => di.attributes)) as Address[];
 
-      result.push({
-        ...queryResult.attributes,
-        objectId: queryResult.id,
-        desiredItems,
-        addresses,
-      });
+      desiredItems.length > 0 &&
+        result.push({
+          ...queryResult.attributes,
+          objectId: queryResult.id,
+          desiredItems,
+          addresses,
+        });
     }
 
     return Promise.resolve(result);

@@ -54,7 +54,11 @@ export const Home = () => {
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
           }),
-          1
+          1,
+          undefined,
+          sessionState.neighbour?.objectId || undefined,
+          sessionState.neighbour?.desiredItems?.map((di) => di.objectId!) ||
+            undefined
         ).then((r) =>
           setNearNeighbours((n) => [
             ...n,
@@ -73,6 +77,7 @@ export const Home = () => {
         )
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* Si hay un usuario llama al Init */
@@ -92,6 +97,7 @@ export const Home = () => {
       }
     }
     newUserFlow();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionState.meliUser?.id, sessionState.neighbour]);
 
   /* Cada vez que cambien las addresses del usuario logueado, se fija las que no están y las agrega a las direcciones para buscar los neighbour cercanos   */
@@ -118,7 +124,14 @@ export const Home = () => {
       if (addressesNoAgregadas.length > 0) {
         Promise.all(
           addressesNoAgregadas.map((ana) =>
-            getNearNeighbours(ana.geolocation, 1)
+            getNearNeighbours(
+              ana.geolocation,
+              1,
+              undefined,
+              sessionState.neighbour?.objectId || undefined,
+              sessionState.neighbour?.desiredItems?.map((di) => di.objectId!) ||
+                undefined
+            )
           )
         ).then((nbs) => {
           for (let index = 0; index < nbs.length; index++) {
@@ -132,6 +145,7 @@ export const Home = () => {
         });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionState.neighbour?.addresses]);
 
   const closeModalHandler = (selectedAddressIds: number[]) => {

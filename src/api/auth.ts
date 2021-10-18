@@ -1,5 +1,4 @@
 import { Token } from '../models/meli/token';
-import { User } from '../models/meli/user';
 import { jsonToUrlEncode, meliFetch } from '../utils/fetch';
 
 const getTokenFromCode = async (code: string) =>

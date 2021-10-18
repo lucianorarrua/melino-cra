@@ -43,6 +43,7 @@ export const MeliAuthorization = () => {
       setLoading(false);
     };
     asyncInit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {

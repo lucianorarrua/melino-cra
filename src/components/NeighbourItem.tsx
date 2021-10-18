@@ -24,6 +24,7 @@ export const NeighbourItem: React.FC<Props> = ({ neighbour }) => {
       setRandomIndex(
         Math.floor(Math.random() * neighbour.desiredItems!?.length)
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

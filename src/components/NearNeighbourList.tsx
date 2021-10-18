@@ -20,9 +20,11 @@ export const NearNeighbourList: React.FC<Props> = ({ nearNeighbour }) => {
         Cerca de {nearNeighbour.address.name}
       </Text>
       <Flex direction={'row'}>
-        {nearNeighbour.neighbour.map((nb, i) => (
-          <NeighbourItem key={`asd-${i}`} neighbour={nb}></NeighbourItem>
-        ))}{' '}
+        {nearNeighbour.neighbour
+          .filter((nb) => nb.desiredItems && nb.desiredItems?.length > 0)
+          .map((nb, i) => (
+            <NeighbourItem key={`nbg-item-${i}`} neighbour={nb}></NeighbourItem>
+          ))}{' '}
       </Flex>{' '}
     </>
   );
